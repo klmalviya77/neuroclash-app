@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Trophy, Loader2, Swords, Skull, User, AlertCircle } from 'lucide-react';
@@ -15,7 +15,8 @@ interface Question {
   correct_option: string;
 }
 
-export default function TournamentArena() {
+// 1. Asli logic ko ek alag function me daal diya hai
+function ArenaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tournamentId = searchParams.get('tourneyId');
@@ -392,5 +393,21 @@ export default function TournamentArena() {
         </div>
       </div>
     </div>
+  );
+}
+
+// 2. Main Page Component jisme ab Suspense laga hua hai
+export default function TournamentArena() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="min-h-screen bg-[#050B14] flex flex-col items-center justify-center text-blue-500">
+          <Loader2 className="w-10 h-10 animate-spin mb-4" />
+          <p className="font-semibold tracking-widest text-xs uppercase">Loading Arena...</p>
+        </div>
+      }
+    >
+      <ArenaContent />
+    </Suspense>
   );
 }
