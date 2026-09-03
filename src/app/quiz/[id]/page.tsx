@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Trophy, ArrowRight, Loader2, Volume2, VolumeX, Flame, Skull } from 'lucide-react';
@@ -15,7 +15,9 @@ interface Question {
   correct_option: string;
 }
 
-export default function BattleArena() {
+// FIX: same useSearchParams()-needs-Suspense build issue as tournament/arena.
+// All original logic is unchanged — just renamed and wrapped below.
+function BattleArenaContent() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -482,5 +484,19 @@ export default function BattleArena() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BattleArena() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#050B14] flex items-center justify-center text-yellow-500">
+          <Loader2 className="w-10 h-10 animate-spin" />
+        </div>
+      }
+    >
+      <BattleArenaContent />
+    </Suspense>
   );
 }

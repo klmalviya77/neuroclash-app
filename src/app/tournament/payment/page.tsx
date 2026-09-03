@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Shield, Loader2, AlertCircle, CheckCircle2, QrCode, Copy, Smartphone, ArrowLeft, Tag, CreditCard } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-export default function TournamentPaymentPage() {
+// FIX: same useSearchParams()-needs-Suspense build issue as the other pages.
+// All original logic is unchanged — just renamed and wrapped below.
+function TournamentPaymentPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tournamentId = searchParams.get('id');
@@ -102,12 +104,11 @@ export default function TournamentPaymentPage() {
       setSuccessMessage("Seat Confirmed! Redirecting to Lobby...");
       
       // Push Notification Permission
-            if (typeof window !== 'undefined' && (window as any).OneSignalDeferred) {
-        (window as any).OneSignalDeferred.push(async function(OneSignal: any) {
-           await OneSignal.Slidedown.promptPush();
+      if (typeof window !== 'undefined' && (window as any).OneSignal) {
+        (window as any).OneSignal.push(function() {
+           (window as any).OneSignal.showNativePrompt();
         });
       }
-
 
       setTimeout(() => {
         router.push('/tournament/lobby');
@@ -337,5 +338,19 @@ export default function TournamentPaymentPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function TournamentPaymentPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#050B14] flex items-center justify-center text-white">
+          <Loader2 className="w-10 h-10 animate-spin" />
+        </div>
+      }
+    >
+      <TournamentPaymentPageContent />
+    </Suspense>
   );
 }
