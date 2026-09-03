@@ -15,11 +15,6 @@ interface Question {
   correct_option: string;
 }
 
-// FIX: all the original logic/JSX now lives in this inner component. The
-// build error happened because `useSearchParams()` needs a <Suspense>
-// boundary around it during static prerendering — without one, Vercel's
-// `npm run build` fails with "Error occurred prerendering page". Nothing in
-// this component's logic has changed, it's just moved out of the default export.
 function TournamentArenaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -400,10 +395,6 @@ function TournamentArenaContent() {
   );
 }
 
-// FIX: default export now just wraps the real component in <Suspense>. This
-// is what satisfies Next.js's requirement for useSearchParams() during
-// static prerendering — without this wrapper, `npm run build` on Vercel
-// fails with "Error occurred prerendering page /tournament/arena".
 export default function TournamentArena() {
   return (
     <Suspense
