@@ -15,8 +15,12 @@ interface Question {
   correct_option: string;
 }
 
-// 1. Asli logic ko ek alag function me daal diya hai
-function ArenaContent() {
+// FIX: all the original logic/JSX now lives in this inner component. The
+// build error happened because `useSearchParams()` needs a <Suspense>
+// boundary around it during static prerendering — without one, Vercel's
+// `npm run build` fails with "Error occurred prerendering page". Nothing in
+// this component's logic has changed, it's just moved out of the default export.
+function TournamentArenaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tournamentId = searchParams.get('tourneyId');
@@ -396,18 +400,20 @@ function ArenaContent() {
   );
 }
 
-// 2. Main Page Component jisme ab Suspense laga hua hai
+// FIX: default export now just wraps the real component in <Suspense>. This
+// is what satisfies Next.js's requirement for useSearchParams() during
+// static prerendering — without this wrapper, `npm run build` on Vercel
+// fails with "Error occurred prerendering page /tournament/arena".
 export default function TournamentArena() {
   return (
-    <Suspense 
+    <Suspense
       fallback={
-        <div className="min-h-screen bg-[#050B14] flex flex-col items-center justify-center text-blue-500">
-          <Loader2 className="w-10 h-10 animate-spin mb-4" />
-          <p className="font-semibold tracking-widest text-xs uppercase">Loading Arena...</p>
+        <div className="min-h-screen bg-[#050B14] flex items-center justify-center text-white">
+          <Loader2 className="w-10 h-10 animate-spin" />
         </div>
       }
     >
-      <ArenaContent />
+      <TournamentArenaContent />
     </Suspense>
   );
 }
